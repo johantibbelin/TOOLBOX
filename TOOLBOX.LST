@@ -1,0 +1,85 @@
+' -----------------------------------
+' * Toolbox ACC                     *
+' *---------------------------------*
+' * Written by:                     *
+' *       Johan Tibbelin (sjfroos)  *
+' *---------------------------------*
+$m 50000
+DIM screensave%(32000/4),pal%(16),fpal%(16)
+' Init ACC
+'
+'
+ap_id&=APPL_INIT()
+IF ap_id&=0
+  ALERT 1,"Not loaded as an ACC.",1,"Got it!",a&
+  END
+ENDIF
+me_id&=MENU_REGISTER(ap_id&,"  TOOLbox")
+key%=PEEK(&HFFFC02)
+t%=TIMER
+DO
+  s%=EVNT_MULTI(&X110000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10000)
+  IF s%=32
+    GOTO timer
+  ENDIF
+  IF MENU(1)=40
+    ALERT 1,"TOOLbox: screensaver and more",1,"OK",a&
+  ENDIF
+timer:
+  IF key%=PEEK(&HFFFC02)
+    '    PRINT AT(10,10);TIMER-t%
+    IF TIMER-t%>15000
+      fade_black
+    ENDIF
+  ELSE
+    key%=PEEK(&HFFFC02)
+    t%=TIMER
+  ENDIF
+LOOP
+PROCEDURE screensave
+  BMOVE XBIOS(2),V:screensave%,32000
+RETURN
+PROCEDURE screenrestore
+  BMOVE V:screensave%,XBIOS(2),32000
+RETURN
+PROCEDURE fade_black
+  ' Save palette
+  FOR i%=0 TO 15
+    pal%(i%)=DPEEK(&HFF8240+i%*2)
+    fpal%(i%)=pal%(i%)
+  NEXT i%
+  ' fade
+  FOR i%=0 TO 15
+    FOR c%=0 TO 15
+      color%=fpal%(c%)
+      IF (color% AND &HF00)>=&H100
+        color%=color%-&H100
+      ENDIF
+      IF (color% AND &HF0)>=&H10
+        color%=color%-&H10
+      ENDIF
+      IF (color% AND &HF)>=&H1
+        color%=color%-&H1
+      ENDIF
+      fpal%(c%)=color%
+      '      PRINT HEX$(color%);
+      '     IF c%<15
+      '    PRINT ",";
+      '  ENDIF
+    NEXT c%
+    ' PRINT
+    IF i%>7
+      FOR c%=0 TO 15
+        SDPOKE &HFF8240+2*c%,fpal%(c%)
+      NEXT c%
+      FOR t%=0 TO 3
+        VSYNC
+      NEXT t%
+    ENDIF
+  NEXT i%
+  ~INP(2)
+  t%=TIMER
+  FOR c%=0 TO 15
+    SDPOKE &HFF8240+c%*2,pal%(c%)
+  NEXT c%
+RETURN
