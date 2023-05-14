@@ -1,0 +1,5 @@
+~RSRC_LOAD("C:\TOOLBOX.RSC")
+~RSRC_GADDR(0,1,tree_adr%)
+~FORM_CENTER(tree_adr%,x%,y%,w%,h%)
+~OBJC_DRAW(tree_adr%,0,2,x%,y%,w%,h%)
+ex%=FORM_DO(tree_adr%,0)
