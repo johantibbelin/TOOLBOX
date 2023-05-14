@@ -6,6 +6,7 @@
 ' *---------------------------------*
 $m 50000
 DIM screensave%(32000/4),pal%(16),fpal%(16)
+currentyear$="2023"
 ' Init ACC
 '
 '
@@ -15,6 +16,7 @@ IF ap_id&=0
   END
 ENDIF
 me_id&=MENU_REGISTER(ap_id&,"  TOOLbox")
+year_fix
 key%=PEEK(&HFFFC02)
 t%=TIMER
 DO
@@ -82,4 +84,7 @@ PROCEDURE fade_black
   FOR c%=0 TO 15
     SDPOKE &HFF8240+c%*2,pal%(c%)
   NEXT c%
+RETURN
+PROCEDURE year_fix
+  DATE$=MID$(DATE$,0,6)+currentyear$
 RETURN
