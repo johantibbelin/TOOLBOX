@@ -6,30 +6,43 @@
 ' *---------------------------------*
 $m 50000
 DIM screensave%(32000/4),pal%(16),fpal%(16)
-currentyear$="2023"
 ' Init ACC
 '
 '
+' GOTO jmp
 ap_id&=APPL_INIT()
 IF ap_id&=0
   ALERT 1,"Not loaded as an ACC.",1,"Got it!",a&
   END
 ENDIF
 me_id&=MENU_REGISTER(ap_id&,"  TOOLbox")
+jmp:
 year_fix
 key%=PEEK(&HFFFC02)
+yf!=FALSE
 t%=TIMER
 DO
   s%=EVNT_MULTI(&X110000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10000)
-  IF s%=32
+  IF s%=1
+    ' keypress resets timer
+    IF yf!=TRUE
+      ' do nothing
+      yf!=FALSE
+    ELSE
+      t%=TIMER
+    ENDIF
+  ELSE IF s%=32
     GOTO timer
   ENDIF
   IF MENU(1)=40
     ALERT 1,"TOOLbox: screensaver and more",1,"OK",a&
+  ELSE IF MENU(1)=41
+    ' APPL_CLOSE message detected
+    year_fix
   ENDIF
 timer:
   IF key%=PEEK(&HFFFC02)
-    '    PRINT AT(10,10);TIMER-t%
+    '  PRINT AT(10,10);USING "#######",TIMER-t%
     IF TIMER-t%>15000
       fade_black
     ENDIF
@@ -37,6 +50,7 @@ timer:
     key%=PEEK(&HFFFC02)
     t%=TIMER
   ENDIF
+loop:
 LOOP
 PROCEDURE screensave
   BMOVE XBIOS(2),V:screensave%,32000
@@ -86,5 +100,13 @@ PROCEDURE fade_black
   NEXT c%
 RETURN
 PROCEDURE year_fix
-  DATE$=MID$(DATE$,0,6)+currentyear$
+  year$=MID$(DATE$,7,4)
+  '  PRINT year$
+  DATE$=MID$(DATE$,0,6)+"2023"
+RETURN
+PROCEDURE event_test
+  REPEAT
+    s%=EVNT_MULTI(&X110001,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10000)
+    PRINT s%
+  UNTIL MOUSEK=2
 RETURN
