@@ -1,0 +1,74 @@
+' Getting .rsc dialogs to work for TOOLbox
+'
+rsc_init
+~RSRC_LOAD("C:\TOOLBOX2.RSC")
+~RSRC_GADDR(0,0,tree_adr%)
+~FORM_CENTER(tree_adr%,x%,y%,w%,h%)
+~OBJC_DRAW(tree_adr%,0,2,x%,y%,w%,h%)
+DO
+  ex%=FORM_DO(tree_adr%,0)
+  a$="id:"+STR$(ex%)
+  IF ex%<>13
+    '    ALERT 0,a$,1,"OK",b&
+  ENDIF
+  IF ex%=darrow&
+    t$=CHAR{{OB_SPEC(tree_adr%,sstime&)}}
+    t&=VAL(t$)
+    IF t&>1
+      t&=t&-1
+    ENDIF
+    CHAR{{OB_SPEC(tree_adr%,sstime&)}}=STR$(t&)
+    OB_STATE(tree_adr%,17)=0
+    ~OBJC_DRAW(tree_adr%,0,2,x%,y%,w%,h%)
+    '    ALERT 1,STR$(t&),1,"ok",b&
+  ELSE IF ex%=uarrow&
+    t$=CHAR{{OB_SPEC(tree_adr%,sstime&)}}
+    t&=VAL(t$)
+    IF t&<20
+      t&=t&+1
+    ENDIF
+    CHAR{{OB_SPEC(tree_adr%,sstime&)}}=STR$(t&)
+    OB_STATE(tree_adr%,18)=0
+    ~OBJC_DRAW(tree_adr%,0,2,x%,y%,w%,h%)
+  ELSE IF ex%=15 ! About
+    ~RSRC_GADDR(0,1,about_adr%)
+    ~FORM_CENTER(about_adr%,ax%,ay%,aw%,ah%)
+    ~OBJC_DRAW(about_adr%,0,2,ax%,ay%,aw%,ah%)
+    ~FORM_DO(about_adr%,0)
+    OB_STATE(tree_adr%,15)=0
+    ~OBJC_DRAW(tree_adr%,0,2,x%,y%,w%,h%)
+  ENDIF
+LOOP UNTIL ex%=13 OR ex%=14
+IF ex%=13
+  ' find states of buttons and fields
+  t$=CHAR{{OB_SPEC(tree_adr%,sstime&)}}
+  stime%=VAL(t$)
+  IF OB_STATE(tree_adr%,yfon&)=1
+    yearfix!=TRUE
+  ELSE
+    yearfix!=FALSE
+  ENDIF
+  IF OB_STATE(tree_adr%,ssoff&)=1
+    screensaver!=FALSE
+  ELSE IF OB_STATE(tree_adr%,ssblank&)=1
+    mbrot!=FALSE
+    screensaver!=TRUE
+  ELSE
+    screensaver!=TRUE
+    mbrot!=TRUE
+  ENDIF
+ENDIF
+PROCEDURE rsc_init
+  LET tree1&=0 !RSC_TREE
+  LET tree2&=1 !RSC_TREE
+  LET ok&=3 !Obj in #1
+  LET sstime&=16 !Obj in #0
+  LET darrow&=17 !Obj in #0
+  LET uarrow&=18 !Obj in #0
+  LET yfon&=11 !Obj in #0
+  LET yfoff&=12 !Obj in #0
+  LET ssoff&=2 !Obj in #0
+  LET ssblank&=3 !Obj in #0
+  LET ssmbrot&=4 !Obj in #0
+  LET version&=7 !Obj in #1
+RETURN
